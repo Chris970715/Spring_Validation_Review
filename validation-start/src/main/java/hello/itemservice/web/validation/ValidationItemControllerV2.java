@@ -3,6 +3,7 @@ package hello.itemservice.web.validation;
 import hello.itemservice.domain.item.Item;
 import hello.itemservice.domain.item.ItemRepository;
 import lombok.RequiredArgsConstructor;
+import hello.itemservice.domain.item.Item;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -50,15 +51,15 @@ public class ValidationItemControllerV2 {
     public String addItem(@ModelAttribute Item item, BindingResult  bindingResult, RedirectAttributes redirectAttributes) {
 
         if (!StringUtils.hasText(item.getItemName())) {
-            bindingResult.addError(new FieldError("item","itemName","Name is required"));
+            bindingResult.addError(new FieldError("item","itemName",item.getItemName(), false, null, null,"Name is required"));
         }
 
         if (item.getPrice() == null || item.getPrice() < 1000 || item.getPrice() > 1000000) {
-            bindingResult.addError(new FieldError("item","price","Price must be between 1 and 1000000"));
+            bindingResult.addError(new FieldError("item","price",item.getPrice(), false, null, null,"Price must be between 1 and 1000000"));
         }
 
         if (item.getQuantity() == null || item.getQuantity() >= 10000) {
-            bindingResult.addError(new FieldError("item","quantity","Quantity must be between 1 and 10000"));
+            bindingResult.addError(new FieldError("item","quantity",item.getQuantity(), false, null,null,"Quantity must be between 1 and 10000"));
         }
 
         //Global vaildation
