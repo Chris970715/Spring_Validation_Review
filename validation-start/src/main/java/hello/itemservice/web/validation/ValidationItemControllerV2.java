@@ -81,18 +81,19 @@ public class ValidationItemControllerV2 {
     */
 
     @PostMapping("/add")
-    public String addItemV2(@ModelAttribute Item item, BindingResult  bindingResult, RedirectAttributes redirectAttributes) {
+    public String addItemV3(@ModelAttribute Item item, BindingResult  bindingResult, RedirectAttributes redirectAttributes) {
 
         if (!StringUtils.hasText(item.getItemName())) {
-            bindingResult.addError(new FieldError("item","itemName",item.getItemName(), false, new String[]{"required.item.itemName"}, null, null));
+            bindingResult.rejectValue("itemName", "required");
         }
 
         if (item.getPrice() == null || item.getPrice() < 1000 || item.getPrice() > 1000000) {
-            bindingResult.addError(new FieldError("item","price",item.getPrice(), false, new String[]{"range.item.price"}, new Object[]{1, 1000000}, null));
+            bindingResult.rejectValue("price", "range", new Object[]{1, 1000000}, null);
         }
 
         if (item.getQuantity() == null || item.getQuantity() >= 10000) {
             bindingResult.addError(new FieldError("item","quantity",item.getQuantity(), false, new String[]{"max.item.quantity"},new Object[]{1, 10000}, null));
+            bindingResult.rejectValue("quantity", "max", new Object[]{1, 10000}, null);
         }
 
         //Global vaildation
@@ -100,7 +101,7 @@ public class ValidationItemControllerV2 {
             int resultPrice = item.getPrice() * item.getQuantity();
 
             if (resultPrice < 10000) {
-                bindingResult.addError(new ObjectError("item",new String[]{"totalPriceMin"}, new Object[]{10000, resultPrice},null));
+                bindingResult.reject("totalPriceMin", new Object[]{10000, resultPrice}, null);
             }
         }
 
