@@ -21,10 +21,12 @@ import java.util.List;
 public class ValidationItemControllerV2 {
 
     private final ItemRepository itemRepository;
+    private final ItemVaildator itemVaildator;
 
     @Autowired
-    public ValidationItemControllerV2(ItemRepository itemRepository) {
+    public ValidationItemControllerV2(ItemRepository itemRepository, ItemVaildator itemVaildator) {
         this.itemRepository = itemRepository;
+        this.itemVaildator = itemVaildator;
     }
 
     @GetMapping
@@ -78,9 +80,8 @@ public class ValidationItemControllerV2 {
 
         return "redirect:/validation/v2/items/{itemId}";
     }
-    */
 
-    @PostMapping("/add")
+        @PostMapping("/add")
     public String addItemV3(@ModelAttribute Item item, BindingResult  bindingResult, RedirectAttributes redirectAttributes) {
 
         if (!StringUtils.hasText(item.getItemName())) {
@@ -88,12 +89,12 @@ public class ValidationItemControllerV2 {
         }
 
         if (item.getPrice() == null || item.getPrice() < 1000 || item.getPrice() > 1000000) {
-            bindingResult.rejectValue("price", "range", new Object[]{1, 1000000}, null);
+            bindingResult.rejectValue("price", "range", new Object[]{1000, 1000000}, null);
         }
 
-        if (item.getQuantity() == null || item.getQuantity() >= 10000) {
-            bindingResult.addError(new FieldError("item","quantity",item.getQuantity(), false, new String[]{"max.item.quantity"},new Object[]{1, 10000}, null));
-            bindingResult.rejectValue("quantity", "max", new Object[]{1, 10000}, null);
+        if (item.getQuantity() == null || item.getQuantity() >= 9999) {
+            //errors.addError(new FieldError("item","quantity",item.getQuantity(), false, new String[]{"max.item.quantity"},new Object[]{1, 10000}, null));
+            bindingResult.rejectValue("quantity", "max", new Object[]{9999}, null);
         }
 
         //Global vaildation
@@ -103,6 +104,23 @@ public class ValidationItemControllerV2 {
             if (resultPrice < 10000) {
                 bindingResult.reject("totalPriceMin", new Object[]{10000, resultPrice}, null);
             }
+        }
+
+        Item savedItem = itemRepository.save(item);
+        redirectAttributes.addFlashAttribute("savedItem", savedItem.getId());
+        redirectAttributes.addFlashAttribute("status", true);
+
+        return "redirect:/validation/v2/items/{itemId}";
+    }
+    */
+
+    @PostMapping("/add")
+    public String addItemV5(@ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+
+        itemVaildator.validate(item, bindingResult);
+
+        if(bindingResult.hasErrors()) {
+            return "validation/v2/addForm";
         }
 
         Item savedItem = itemRepository.save(item);
